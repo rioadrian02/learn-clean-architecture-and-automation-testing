@@ -1,3 +1,4 @@
+import AuthenticationError from "../../Commons/exceptions/AuhtenticationError.js";
 import LoginUser from "../../Domains/users/LoginUser.js";
 
 class LoginUserUseCase {
@@ -18,7 +19,7 @@ class LoginUserUseCase {
         const isPasswordMatch = await this._passwordHash.comparePassword(password, hashedPassword);
 
         if(!isPasswordMatch) {
-            throw new Error('LOGIN_USER.WRONG_PASSWORD');
+            throw new AuthenticationError('LOGIN_USER.WRONG_PASSWORD');
         }
 
         const userId = await this._userRepository.getIdByUsername(username);

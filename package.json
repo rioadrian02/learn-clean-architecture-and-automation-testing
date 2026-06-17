@@ -15,7 +15,8 @@
     "transform": {},
     "testMatch": [
       "**/_test/**/*.test.js"
-    ]
+    ],
+    "setupFiles": ["./jest.setup.js"]
   },
   "keywords": [],
   "author": "",

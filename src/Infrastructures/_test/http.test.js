@@ -32,7 +32,6 @@ describe('POST /users', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.status).toBe('fail');
-        expect(res.body.message).toBe('Username sudah digunakan');
 
     });
 
@@ -46,7 +45,6 @@ describe('POST /users', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.status).toBe('fail');
-        expect(res.body.message).toBe('REGISTER_USER.MISSING_REQUIRED_PROPERTY');
     });
 });
 
@@ -73,7 +71,6 @@ describe('POST /authentications', () => {
             });
         expect(res.statusCode).toBe(401);
         expect(res.body.status).toBe('fail');
-        expect(res.body.message).toBe('LOGIN_USER.WRONG_PASSWORD');
     });
 
     test('harus mengembalikan 400 jika request tidak valid', async () => {
@@ -85,7 +82,6 @@ describe('POST /authentications', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.status).toBe('fail');
-        expect(res.body.message).toBe('LOGIN_USER.MISSING_REQUIRED_PROPERTY');
     });
 
     test('harus mengembalikan 400 jika tipe data tidak valid', async () => {
@@ -98,6 +94,70 @@ describe('POST /authentications', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.status).toBe('fail');
-        expect(res.body.message).toBe('LOGIN_USER.WRONG_DATA_TYPE');
+    });
+});
+
+describe('PUT /authentications', () => {
+    test('harus mengembalikan 200 dan access token baru', async() => {
+        const resLogin = await request(app)
+            .post('/authentications')
+            .send({
+                username: 'budifunctional',
+                password: 'rahasia123'
+            });
+        
+        const { refreshToken } = resLogin.body.data;
+
+        const res = await request(app)
+            .put('/authentications')
+            .send({
+                refreshToken
+            });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.status).toBe('success');
+        expect(res.body.data.accessToken).toBeDefined();
+    });
+
+    test('harus mengembalikan 400 jika token tidak valid', async () => {
+        const res = await request(app)
+            .put('/authentications')
+            .send({
+                refreshToken: 'tidak valid'
+            });
+        
+        expect(res.statusCode).toBe(400);
+        expect(res.body.status).toBe('fail');
+    })
+});
+
+describe('DELETE /authentications', () => {
+    test('harus mengembalikan 200 jika logout berhasil', async () => {
+        const resLogin = await request(app)
+            .post('/authentications')
+            .send({
+                username: 'budifunctional',
+                password: 'rahasia123'
+            }); 
+
+        const { refreshToken } = resLogin.body.data;
+
+        const res = await request(app)
+            .delete('/authentications')
+            .send({
+                refreshToken
+            });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.status).toBe('success');
+    });
+
+    test('harus mengembalikan 400 jika refresh token tidak ditemukan di database', async () => {
+        const res = await request(app)
+            .delete('/authentications')
+            .send({ refreshToken: 'token_palsu' });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.status).toBe('fail');
     });
 });

@@ -100,7 +100,7 @@ const createServer = () => {
 
             const user = await updateFullnameUseCase.execute(req.body, req.params);
 
-            return res.status(201).json({
+            return res.status(200).json({
                 status: 'success',
                 data: {
                     user

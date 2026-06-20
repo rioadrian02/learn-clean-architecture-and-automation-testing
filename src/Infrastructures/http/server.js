@@ -1,10 +1,15 @@
 import express from 'express';
+import cors from 'cors';
 import ClientError from '../../Commons/exceptions/ClientError.js';
 import container from '../container.js';
 
 
 const createServer = () => {
     const app = express();
+
+    // using cors
+    app.use(cors());
+
     app.use(express.json());
 
     // Post Users

@@ -1,178 +1,35 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import ClientError from '../../Commons/exceptions/ClientError.js';
-import container from '../container.js';
-
+import userRoutes from './routes/users.js';
+import authenticationRoutes from './routes/authentications.js';
+import ErrorHandler from './middlewares/ErrorHandler.js';
+import { globalLimiter } from './middlewares/RateLimiter.js';
 
 const createServer = () => {
     const app = express();
 
+    // using helmet
     app.use(helmet());
 
     // using cors
-    app.use(cors());
-
-    // rate limiting
+    app.use(cors());    
 
     // global limiter
-    const globalLimiter = rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 100,
-        standardHeaders: true,
-        legacyHeaders: false,
-        message: {
-            status: 'fail',
-            message: 'Terlalu banyak request, silahkan coba lagi dalam 15 menit'
-        }
-    });
-
     app.use(globalLimiter);
 
     app.use(express.json());
 
-    // Post Users
-    app.post('/users', async (req, res) => {
-        try {
-            const addUser = container.getInstance('AddUserUseCase');
-            const registeredUser = await addUser.execute(req.body);
+    // user routes
+    app.use('/users', userRoutes);
 
-            return res.status(201).json({
-                status: 'success',
-                data: {
-                    registeredUser
-                }
-            });
-        } catch (error) {
-            return handleError(error, res);
-        }
-    });
+    // auth routes
+    app.use('/authentications', authenticationRoutes);
 
-    // rate limiting
-    // login limiter
-    const loginLimitter = rateLimit({
-        windowMs: 15 * 60 * 1000, //dalam milidetik
-        max: 10,
-        standardHeaders: true,
-        legacyHeaders: false,
-        message: {
-            status: 'fail',
-            message: 'Terlalu banyak percobaan login, coba lagi dalam 15 menit'
-        }
-    });
-
-    // post login
-    app.post('/authentications', loginLimitter, async (req, res) => {
-        try {
-            const loginUserUseCase = container.getInstance('LoginUserUseCase');
-
-            const { accessToken, refreshToken } = await loginUserUseCase.execute(req.body);
-
-            return res.status(201).json({
-                status: 'success',
-                data: {
-                    accessToken,
-                    refreshToken
-                }
-            });
-        } catch(error) {
-            return handleError(error, res);
-        }
-    });
-
-    // refresh token
-     app.put('/authentications', async (req, res) => {
-        try {
-            const refreshAuthenticationUseCase = container.getInstance('RefreshAuthenticationUseCase');
-
-            const { accessToken } = await refreshAuthenticationUseCase.execute(req.body);
-
-            return res.status(200).json({
-                status: 'success',
-                data: { accessToken },
-            });
-
-        } catch (error) {
-            return handleError(error, res);
-        }
-    });
-
-    // DELETE /authentications — logout
-    app.delete('/authentications', async (req, res) => {
-        try {
-            const logoutUserUseCase = container.getInstance('LogoutUserUseCase');
-
-            await logoutUserUseCase.execute(req.body);
-
-            return res.status(200).json({
-                status: 'success',
-                message: 'Logout berhasil',
-            });
-
-        } catch (error) {
-            return handleError(error, res);
-        }
-    });
-
-    app.get('/users/:id', async (req, res) => {
-        try {
-            const detailUserUseCase = container.getInstance('DetailUserUseCase');
-
-            const user = await detailUserUseCase.execute(req.params);
-
-            return res.status(200).json({
-                status: 'success',
-                data: {
-                    user
-                }
-            });
-        } catch (error) {
-            return handleError(error, res);
-        }
-    });
-
-    app.put('/users/:id', async (req, res) => {
-        try {
-            const updateFullnameUseCase = container.getInstance('UpdateFullnameUseCase');
-
-            const user = await updateFullnameUseCase.execute(req.body, req.params);
-
-            return res.status(200).json({
-                status: 'success',
-                data: {
-                    user
-                }
-            });
-        } catch(error) {
-            return handleError(error, res);
-        }
-    });
+    // error handler
+    app.use(ErrorHandler);
 
     return app;
-}
-
-const handleError = (error, res) => {
-    if(error instanceof ClientError) {
-        return res.status(error.statusCode).json({
-            status: 'fail',
-            message: error.message
-        });
-    }
-
-    if (/^[A-Z_]+\.[A-Z_]+$/.test(error.message)) {
-        return res.status(400).json({
-            status: 'fail',
-            message: error.message,
-        });
-    }
-
-
-    console.error(error);
-    return res.status(500).json({
-        status: 'error',
-        message: 'Internal Server Error'
-    });
 }
 
 export default createServer;

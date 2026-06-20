@@ -1,5 +1,7 @@
 import express from 'express';
+import helmet from 'helmet';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import ClientError from '../../Commons/exceptions/ClientError.js';
 import container from '../container.js';
 
@@ -7,8 +9,26 @@ import container from '../container.js';
 const createServer = () => {
     const app = express();
 
+    app.use(helmet());
+
     // using cors
     app.use(cors());
+
+    // rate limiting
+
+    // global limiter
+    const globalLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: {
+            status: 'fail',
+            message: 'Terlalu banyak request, silahkan coba lagi dalam 15 menit'
+        }
+    });
+
+    app.use(globalLimiter);
 
     app.use(express.json());
 
@@ -29,8 +49,21 @@ const createServer = () => {
         }
     });
 
+    // rate limiting
+    // login limiter
+    const loginLimitter = rateLimit({
+        windowMs: 15 * 60 * 1000, //dalam milidetik
+        max: 10,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: {
+            status: 'fail',
+            message: 'Terlalu banyak percobaan login, coba lagi dalam 15 menit'
+        }
+    });
+
     // post login
-    app.post('/authentications', async (req, res) => {
+    app.post('/authentications', loginLimitter, async (req, res) => {
         try {
             const loginUserUseCase = container.getInstance('LoginUserUseCase');
 

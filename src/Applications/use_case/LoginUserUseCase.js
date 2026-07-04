@@ -28,7 +28,7 @@ class LoginUserUseCase {
         const accessToken = await this._tokenManager.createAccessToken({ userId, username });
         const refreshToken = await this._tokenManager.createRefreshToken({ userId, username });
 
-        await this._authenticationRepository.addToken(refreshToken);
+        await this._authenticationRepository.addToken(refreshToken, userId);
 
         return { accessToken, refreshToken };
     }

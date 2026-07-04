@@ -8,6 +8,7 @@ import LogoutUserUseCase from '../Applications/use_case/LogoutUserUseCase.js';
 import RefreshAuthenticationUseCase from '../Applications/use_case/RefreshAuthenticationUseCase.js';
 import DetailUserUseCase from '../Applications/use_case/DetailUserUseCase.js';
 import UpdateFullnameUseCase from '../Applications/use_case/UpdateFullnameUseCase.js';
+import DeleteUserUseCase from '../Applications/use_case/DeleteUserUseCase.js';
 
 const userRepository = new UserRepositoryPostgres();
 const authenticationRepository = new AuthenticationRepositoryPostgres();
@@ -42,6 +43,9 @@ const container = {
 
             case 'UpdateFullnameUseCase':
                 return new UpdateFullnameUseCase({ userRepository });
+
+            case 'DeleteUserUseCase':
+                return new DeleteUserUseCase({ userRepository, authenticationRepository });
 
             default:
                 throw new Error(`Use case ${key.name} tidak ditemukan di container`);

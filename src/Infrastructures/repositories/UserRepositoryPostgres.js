@@ -98,6 +98,23 @@ class UserRepositoryPostgres extends UserRepository {
 
         return result.rows[0];
     }
+
+    async deleteUser(id, client) {
+        const db = client || this._pool;
+
+        const query = {
+            text: 'DELETE FROM users WHERE id=$1 RETURNING id',
+            values: [id]
+        }
+
+        const result = await db.query(query);
+
+        if(!result.rows[0]) {
+            throw new NotFoundError('User tidak ditemukan');
+        }
+
+        return result.rows[0];
+    }
 }
 
 export default UserRepositoryPostgres;

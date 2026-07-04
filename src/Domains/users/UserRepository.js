@@ -14,6 +14,19 @@ class UserRepository{
     async getIdByUsername(username) {
         throw new Error('DOMAIN.USER_REPOSITORY.METHOD_NOT_IMPLEMENTED');
     }
+
+    async getUserById(username) {
+        throw new Error('DOMAIN.USER_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+    }
+
+    async updateFullnameById(username) {
+        throw new Error('DOMAIN.USER_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+    }
+
+    async deleteUser(id, client) {
+        throw new Error('DOMAIN.USER_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+    }
+    
 }
 
 export default UserRepository;

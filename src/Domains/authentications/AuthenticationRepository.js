@@ -10,6 +10,10 @@ class AuthenticationRepository {
     async deleteToken(token) {
         throw new Error('DOMAIN.AUTHENTICATION_REPOSITORY.METHOD_NOT_IMPLEMENTED')
     }
+
+    async deleteAllTokenByUserId(userId, client) {
+        throw new Error('DOMAIN.AUTHENTICATION_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+    }
 }
 
 export default AuthenticationRepository;

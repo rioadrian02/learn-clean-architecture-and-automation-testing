@@ -55,6 +55,22 @@ class UsersHandler {
             return next(error);
         }
     }
+
+    async deleteUser(req, res, next) {
+        try {
+            const deleteUserUseCase = container.getInstance('DeleteUserUseCase');
+
+            await deleteUserUseCase.execute({ userId: req.params.id});
+
+            logger.info('User berhasil dihapus', { userId: req.params.id });
+            return res.status(200).json({
+                status: 'success',
+                message: 'User berhasil dihapus'
+            });
+        } catch(error) {
+            return next(error);
+        }
+    }
 }
 
 export default new UsersHandler();

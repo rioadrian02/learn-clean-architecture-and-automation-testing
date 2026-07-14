@@ -48,18 +48,8 @@ jobs:
       # Buat tabel di database test
       - name: Setup database
         run: |
-          PGPASSWORD=postgres psql -h localhost -U postgres -d authapi_test -c "
-            CREATE TABLE IF NOT EXISTS users (
-              id VARCHAR(50) PRIMARY KEY,
-              username VARCHAR(50) UNIQUE NOT NULL,
-              password TEXT NOT NULL,
-              fullname TEXT NOT NULL,
-              created_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS authentications (
-              token TEXT NOT NULL
-            );
-          "
+          PGPASSWORD=postgres psql -h localhost -U postgres -d authapi_test -c "CREATE TABLE IF NOT EXISTS users (id VARCHAR(50) PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, password TEXT NOT NULL, fullname TEXT NOT NULL, created_at TEXT NOT NULL);"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d authapi_test -c "CREATE TABLE IF NOT EXISTS authentications (token TEXT NOT NULL, user_id VARCHAR(50));"
       # Jalankan test
       - name: Run tests
         env:

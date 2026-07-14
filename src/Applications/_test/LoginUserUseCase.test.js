@@ -56,7 +56,7 @@ describe('LoginUserUseCase', () => {
             username: 'budi'
         });
 
-        expect(mockAuthenticationRepository.addToken).toHaveBeenCalledWith('refresh_token_123');
+        expect(mockAuthenticationRepository.addToken).toHaveBeenCalledWith('refresh_token_123', 'user-123');
     });
 
     test('harus error jika password salah', async () => {

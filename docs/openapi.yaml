@@ -1,0 +1,336 @@
+openapi: 3.0.0
+
+info:
+  title: Auth API
+  description: API untuk autentikasi pengguna
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /users:
+    post:
+      summary: Registrasi pengguna baru
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - fullname
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                  example: budisantoso
+                password:
+                  type: string
+                  minLength: 6
+                  example: rahasia123
+                fullname:
+                  type: string
+                  example: Budi Santoso
+      responses:
+        '201':
+          description: Pengguna berhasil didaftarkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      registeredUser:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: user-xxxxxxxxxxxxxxxx
+                          username:
+                            type: string
+                            example: budisantoso
+                          fullname:
+                            type: string
+                            example: Budi Santoso
+        '400':
+          description: Data tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+  /users/{userId}:
+    get:
+      summary: Mendapatkan detail pengguna
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: user-xxxxxxxxxxxxxxxx
+      responses:
+        '200':
+          description: Data pengguna berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '404':
+          description: Pengguna tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+    put:
+      summary: Update fullname pengguna
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: user-xxxxxxxxxxxxxxxx
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullname
+              properties:
+                fullname:
+                  type: string
+                  example: Budi Santoso Baru
+      responses:
+        '200':
+          description: Fullname berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '404':
+          description: Pengguna tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+    delete:
+      summary: Hapus pengguna
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: user-xxxxxxxxxxxxxxxx
+      responses:
+        '200':
+          description: Pengguna berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User berhasil dihapus
+        '404':
+          description: Pengguna tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+  /authentications:
+    post:
+      summary: Login pengguna
+      tags:
+        - Authentications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: budisantoso
+                password:
+                  type: string
+                  example: rahasia123
+      responses:
+        '201':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                      refreshToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Kredensial salah
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+    put:
+      summary: Refresh access token
+      tags:
+        - Authentications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Access token berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Refresh token tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+    delete:
+      summary: Logout pengguna
+      tags:
+        - Authentications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Logout berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Logout berhasil
+        '400':
+          description: Refresh token tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
+# Komponen yang bisa dipakai ulang di seluruh dokumen
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user-xxxxxxxxxxxxxxxx
+        username:
+          type: string
+          example: budisantoso
+        fullname:
+          type: string
+          example: Budi Santoso
+
+    FailResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        message:
+          type: string
+          example: Pesan error di sini
